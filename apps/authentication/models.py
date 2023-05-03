@@ -46,6 +46,13 @@ class gpt_data(db.Model, UserMixin) :
     pass_count = db.Column(db.Integer, default = 0)
     fail_count = db.Column(db.Integer, default = 0)
     rate = db.Column(db.Float, default = 0.0)
+    bug_count = db.Column(db.Integer, default = 0)
+
+class user_word_data(db.Model, UserMixin) :
+    __tablename__ = 'user_word_data'
+    id = db.Column(db.Integer, primary_key = True)
+    username = db.Column(db.Text)
+    index = db.Column(db.Integer)
 
 @login_manager.user_loader
 def user_loader(id):

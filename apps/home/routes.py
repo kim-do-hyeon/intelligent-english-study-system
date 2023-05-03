@@ -5,8 +5,8 @@ import pandas as pd
 from apps import db
 from apps.home import blueprint
 from apps.home.get_sentence_module import *
-from apps.authentication.models import Excel_Data, word_data, gpt_data
-from flask import render_template, request, redirect, flash
+from apps.authentication.models import Excel_Data, word_data, gpt_data, user_word_data
+from flask import render_template, request, redirect, flash, jsonify, session
 from flask_login import login_required
 from jinja2 import TemplateNotFound
 from werkzeug.utils import secure_filename
@@ -33,10 +33,30 @@ def learn(subpath) :
                                 )
         db.session.add(database_value)
         db.session.commit()
+        index = gpt_data.query.filter_by(word1 = random_words_datas[0].word,
+                                    word2 = random_words_datas[1].word,
+                                    example = sentence,
+                                    example_mean = translate).first().id
         return render_template("home/word_learn.html", title = "toeic",
                                original_datas = random_words_datas,
-                               gpt_data = gpt_values)
+                               gpt_data = gpt_values, index = index)
 
+@blueprint.route('/ajax', methods=['GET', 'POST'])
+# @login_required
+def ajax() :
+    data = request.get_json()
+    index = int(data['value'])
+    if data['type'] == "add_word_data" :
+        username = session['username']
+        database_data = user_word_data(username = username, index = index)
+        db.session.add(database_data)
+        db.session.commit()
+        return jsonify(result = 'success')
+    elif data['type'] == "report" :
+        bug_count = gpt_data.query.filter_by(id=index).first().bug_count + 1
+        gpt_data.query.filter_by(id=index).update(dict(bug_count=int(bug_count)))
+        db.session.commit()
+        return jsonify(result = "success")
 @blueprint.route('/admin/<path:subpath>', methods=['GET', 'POST'])
 # @login_required
 def admin(subpath) :

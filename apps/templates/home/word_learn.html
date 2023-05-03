@@ -38,7 +38,7 @@
                                 </tr>
                                 <tr>
                                     <td>{{original_datas[0].chapter}}</td>
-                                    <td>{{original_datas[0].word}}</td>
+                                    <td><b>{{original_datas[0].word}}</b></td>
                                     <td>{{original_datas[0].mean}}</td>
                                     <td>{{original_datas[0].parts}}</td>
                                 </tr>
@@ -67,7 +67,7 @@
                                 </tr>
                                 <tr>
                                     <td>{{original_datas[1].chapter}}</td>
-                                    <td>{{original_datas[1].word}}</td>
+                                    <td><b>{{original_datas[1].word}}</b></td>
                                     <td>{{original_datas[1].mean}}</td>
                                     <td>{{original_datas[1].parts}}</td>
                                 </tr>
@@ -99,21 +99,55 @@
                                             </span>
                                             다음 학습
                                         </a>
-                                        <a href="/learn/{{id}}" class="btn btn-primary">
+                                        <button class="btn btn-primary" type="button" onclick="ajax('add_word_data')">
                                             <span class="me-1">
                                                 <span class="fas fa-envelope"></span>
                                             </span>
-                                            학습장에 추가
-                                        </a>
+                                            학습장 추가
+                                        </button>
+                                        <button class="btn btn-primary" type="button" onclick="ajax('report')">
+                                            <span class="me-1">
+                                                <span class="fas fa-duotone fa-bug"></span>
+                                            </span>
+                                            버그 신고
+                                        </button>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+                <script>
+                    function ajax(data_type){
+                        if(data_type == "add_word_data"){
+                            var postdata = {'type':'add_word_data', 'value' : '{{index}}'}
+                        }else if(data_type == "report"){
+                            var postdata = {'type':'report', 'value' : '{{index}}'}
+                        }
+                        
+                        $.ajax({
+                            type: 'POST',
+                            url: '/ajax',
+                            data : JSON.stringify(postdata),
+                            dataType : 'JSON',
+                            contentType: "application/json",
+                            success: function (response) {
+                                if(data_type == "add_word_data"){
+                                    alert("단어장에 추가되었습니다.");
+                                }else if(data_type == "report"){
+                                    alert("정상적으로 버그가 신고되었습니다.")
+                                }
+                                
+                            },
+                            error: function(request, status, error){
+                                alert('통신 실패')
+                                alert(error);
+                            }
+                        })
+                    }
+                </script>
             </div>
         </div>
-
     </main>
 
 {% endblock content %}
