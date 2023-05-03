@@ -2,11 +2,14 @@
 from apps import db
 from apps.home import blueprint
 from flask import render_template, request, redirect, flash
-from apps.authentication.models import Excel_Data
+from apps.authentication.models import Excel_Data, word_data
 from flask_login import login_required
 from jinja2 import TemplateNotFound
 from werkzeug.utils import secure_filename
+from apps.home.get_sentence_module import *
 import os
+import random
+import pandas as pd
 @blueprint.route('/index')
 # @login_required
 def index():
@@ -16,8 +19,14 @@ def index():
 # @login_required
 def learn(subpath) :
     if subpath == "toeic" :
-        print("TOEIC")
-        return "A"
+        total_datas = word_data.query.all()
+        randon_word_indexs = random.sample(range(0,len(total_datas)),2)
+        random_words_datas = [total_datas[randon_word_indexs[0]], total_datas[randon_word_indexs[1]]]
+        sentence, translate = gen_sentence(random_words_datas[0].word, random_words_datas[1].word)
+        gpt_data = [sentence, translate]
+        return render_template("home/word_learn.html", title = "toeic",
+                               original_datas = random_words_datas,
+                               gpt_data = gpt_data)
 
 @blueprint.route('/admin/<path:subpath>', methods=['GET', 'POST'])
 # @login_required
@@ -42,7 +51,75 @@ def admin(subpath) :
             return redirect('/admin/upload/word')
     elif subpath[0] == "management" :
         if subpath[1] == "database" :
-            return "Management Database"
+            if subpath[2] == "view" :
+                excel_datas = Excel_Data.query.filter_by(active=1).all()
+                word_datas = word_data.query.all()
+                word_data_frame = pd.DataFrame()
+                for i in excel_datas :
+                    df = pd.read_excel(os.getcwd() + "/apps/upload_excel/" + str(i.filename), sheet_name="영단어")
+                    df = df.fillna(method='ffill')
+                    word_data_frame = pd.concat([word_data_frame, df])
+                word_data_frame = word_data_frame.values.tolist()
+                return render_template('home/word_data.html',
+                                       word_datas = word_datas,
+                                       excel_datas = excel_datas,
+                                       word_data_frame = word_data_frame)
+            elif subpath[2] == "add" :
+                if subpath[3] == "all" :
+                    excel_datas = Excel_Data.query.filter_by(active=1).all()
+                    word_data_frame = pd.DataFrame()
+                    for i in excel_datas :
+                        df = pd.read_excel(os.getcwd() + "/apps/upload_excel/" + str(i.filename), sheet_name="영단어")
+                        df = df.fillna(method='ffill')
+                        word_data_frame = pd.concat([word_data_frame, df])
+                    word_data_frame = word_data_frame.values.tolist()
+                    for i in range(len(word_data_frame)) :
+                        select_data = (word_data_frame[i])
+                        data = word_data(chapter = select_data[0], 
+                                        number = select_data[1],
+                                        word = select_data[2],
+                                        priority = select_data[3],
+                                        parts = select_data[4],
+                                        mean = select_data[5],
+                                        example = select_data[6],
+                                        example_mean = select_data[7])
+                        db.session.add(data)
+                    db.session.commit()
+                    return redirect("/admin/management/database/view")
+                elif subpath[3] != "all" :
+                    excel_datas = Excel_Data.query.filter_by(active=1).all()
+                    word_data_frame = pd.DataFrame()
+                    for i in excel_datas :
+                        df = pd.read_excel(os.getcwd() + "/apps/upload_excel/" + str(i.filename), sheet_name="영단어")
+                        df = df.fillna(method='ffill')
+                        word_data_frame = pd.concat([word_data_frame, df])
+                    word_data_frame = word_data_frame.values.tolist()
+                    select_data = (word_data_frame[int(subpath[3])])
+                    data = word_data(chapter = select_data[0], 
+                                    number = select_data[1],
+                                    word = select_data[2],
+                                    priority = select_data[3],
+                                    parts = select_data[4],
+                                    mean = select_data[5],
+                                    example = select_data[6],
+                                    example_mean = select_data[7])
+                    db.session.add(data)
+                    db.session.commit()
+                    return redirect("/admin/management/database/view")
+            elif subpath[2] == "delete" :
+                if subpath[3] == "all" :
+                    data = word_data.query.all()
+                    for i in data :
+                        db.session.delete(i)
+                    db.session.commit()
+                    return redirect("/admin/management/database/view")
+                elif subpath[3] != "all" :
+                    data = word_data.query.filter_by(id = int(subpath[3])).first()
+                    db.session.delete(data)
+                    db.session.commit()
+                    return redirect("/admin/management/database/view")
+        
+
         # 단어장 적용
         elif subpath[1] == "apply" :
             data = Excel_Data.query.filter_by(id = subpath[2]).update(dict(active=1))

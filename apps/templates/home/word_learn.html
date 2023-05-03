@@ -1,0 +1,122 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} UI Tables {% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+    <main>
+        {% include 'includes/preloader.html' %}
+        <!-- Hero -->
+        <div class="section-header pb-6 bg-primary text-white">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-md-8 text-center">
+                        <h1 class="display-3 mb-4">-{{title}}-</h1>
+                        <p class="lead mb-5">해커스토익 단어장에 나온 단어들을 통해 ChatGpt를 이용하여 예문을 생성해드립니다.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- End of Hero -->
+        <div class="section section-md">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-6">
+                        <div class="mb-4">
+                            <span class="h5">단어1</span>
+                        </div>
+                        <div class="mb-5">
+                            <table class="table">
+                                <tr>
+                                    <th>챕터</th>
+                                    <th>단어</th>
+                                    <th>뜻</th>
+                                    <th>품사</th>
+                                </tr>
+                                <tr>
+                                    <td>{{original_datas[0].chapter}}</td>
+                                    <td>{{original_datas[0].word}}</td>
+                                    <td>{{original_datas[0].mean}}</td>
+                                    <td>{{original_datas[0].parts}}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="1">예문</td>
+                                    <td colspan="3">{{original_datas[0].example}}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="1">해석</td>
+                                    <td colspan="3">{{original_datas[0].example_mean}}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="mb-4">
+                            <span class="h5">단어2</span>
+                        </div>
+                        <div class="mb-5">
+                            <table class="table">
+                                <tr>
+                                    <th>챕터</th>
+                                    <th>단어</th>
+                                    <th>뜻</th>
+                                    <th>품사</th>
+                                </tr>
+                                <tr>
+                                    <td>{{original_datas[1].chapter}}</td>
+                                    <td>{{original_datas[1].word}}</td>
+                                    <td>{{original_datas[1].mean}}</td>
+                                    <td>{{original_datas[1].parts}}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="1">예문</td>
+                                    <td colspan="3">{{original_datas[1].example}}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="1">해석</td>
+                                    <td colspan="3">{{original_datas[1].example_mean}}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="row justify-content-center">
+                    <div class="col-12 mt-5">
+                        <div class="card shadow mb-6">
+                            <div class="card-body px-5 py-5 text-center text-md-left">
+                                <div class="row align-items-center">
+                                    <h2>{{gpt_data[0]}}</h2>
+                                    <p class="mb-0">
+                                        {{gpt_data[1]}}
+                                    </p><br><br>
+                                    <div class="col-12">
+                                        <a href="/learn/{{title}}" class="btn btn-primary">
+                                            <span class="me-1">
+                                                <span class="fas fa-headphones"></span>
+                                            </span>
+                                            다음 학습
+                                        </a>
+                                        <a href="/learn/{{id}}" class="btn btn-primary">
+                                            <span class="me-1">
+                                                <span class="fas fa-envelope"></span>
+                                            </span>
+                                            학습장에 추가
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}

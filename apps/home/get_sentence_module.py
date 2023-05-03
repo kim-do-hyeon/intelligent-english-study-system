@@ -4,7 +4,7 @@ import ssl
 import json
 import openai
 import urllib.request
-from api_key import *
+from apps.home.api_key import *
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
