@@ -1,15 +1,16 @@
 # -*- encoding: utf-8 -*-
-from apps import db
-from apps.home import blueprint
-from flask import render_template, request, redirect, flash
-from apps.authentication.models import Excel_Data, word_data
-from flask_login import login_required
-from jinja2 import TemplateNotFound
-from werkzeug.utils import secure_filename
-from apps.home.get_sentence_module import *
 import os
 import random
 import pandas as pd
+from apps import db
+from apps.home import blueprint
+from apps.home.get_sentence_module import *
+from apps.authentication.models import Excel_Data, word_data, gpt_data
+from flask import render_template, request, redirect, flash
+from flask_login import login_required
+from jinja2 import TemplateNotFound
+from werkzeug.utils import secure_filename
+
 @blueprint.route('/index')
 # @login_required
 def index():
@@ -23,10 +24,18 @@ def learn(subpath) :
         randon_word_indexs = random.sample(range(0,len(total_datas)),2)
         random_words_datas = [total_datas[randon_word_indexs[0]], total_datas[randon_word_indexs[1]]]
         sentence, translate = gen_sentence(random_words_datas[0].word, random_words_datas[1].word)
-        gpt_data = [sentence, translate]
+        gpt_values = [sentence, translate]
+        database_value = gpt_data(
+                                    word1 = random_words_datas[0].word,
+                                    word2 = random_words_datas[1].word,
+                                    example = sentence,
+                                    example_mean = translate
+                                )
+        db.session.add(database_value)
+        db.session.commit()
         return render_template("home/word_learn.html", title = "toeic",
                                original_datas = random_words_datas,
-                               gpt_data = gpt_data)
+                               gpt_data = gpt_values)
 
 @blueprint.route('/admin/<path:subpath>', methods=['GET', 'POST'])
 # @login_required

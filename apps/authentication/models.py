@@ -35,7 +35,18 @@ class word_data(db.Model, UserMixin) :
     mean = db.Column(db.Text)
     example = db.Column(db.Text)
     example_mean = db.Column(db.Text)
-    
+
+class gpt_data(db.Model, UserMixin) :
+    __tablename__ = 'gpt_data'
+    id = db.Column(db.Integer, primary_key = True)
+    word1 = db.Column(db.Text)
+    word2 = db.Column(db.Text)
+    example = db.Column(db.Text)
+    example_mean = db.Column(db.Text)
+    pass_count = db.Column(db.Integer, default = 0)
+    fail_count = db.Column(db.Integer, default = 0)
+    rate = db.Column(db.Float, default = 0.0)
+
 @login_manager.user_loader
 def user_loader(id):
     return Users.query.filter_by(id=id).first()
