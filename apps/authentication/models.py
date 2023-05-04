@@ -54,6 +54,15 @@ class user_word_data(db.Model, UserMixin) :
     username = db.Column(db.Text)
     index = db.Column(db.Integer)
 
+class user_data(db.Model, UserMixin) :
+    __tablename__ = 'user_data'
+    id = db.Column(db.Integer, primary_key = True)
+    username = db.Column(db.Text)
+    index = db.Column(db.Integer)
+    pass_count = db.Column(db.Integer, default = 0)
+    fail_count = db.Column(db.Integer, default = 0)
+    rate = db.Column(db.Float, default = 0.0)
+
 @login_manager.user_loader
 def user_loader(id):
     return Users.query.filter_by(id=id).first()

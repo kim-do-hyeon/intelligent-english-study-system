@@ -5,7 +5,7 @@ import pandas as pd
 from apps import db
 from apps.home import blueprint
 from apps.home.get_sentence_module import *
-from apps.authentication.models import Excel_Data, word_data, gpt_data, user_word_data
+from apps.authentication.models import Excel_Data, word_data, gpt_data, user_word_data, user_data
 from flask import render_template, request, redirect, flash, jsonify, session
 from flask_login import login_required
 from jinja2 import TemplateNotFound
@@ -17,7 +17,7 @@ def index():
     return render_template('home/index.html', segment='index')
 
 @blueprint.route('/learn/<path:subpath>')
-# @login_required
+@login_required
 def learn(subpath) :
     if subpath == "toeic" :
         total_datas = word_data.query.all()
@@ -26,17 +26,23 @@ def learn(subpath) :
         sentence, translate = gen_sentence(random_words_datas[0].word, random_words_datas[1].word)
         gpt_values = [sentence, translate]
         database_value = gpt_data(
-                                    word1 = random_words_datas[0].word,
-                                    word2 = random_words_datas[1].word,
-                                    example = sentence,
-                                    example_mean = translate
-                                )
+            word1 = random_words_datas[0].word,
+            word2 = random_words_datas[1].word,
+            example = sentence,
+            example_mean = translate
+        )
         db.session.add(database_value)
         db.session.commit()
         index = gpt_data.query.filter_by(word1 = random_words_datas[0].word,
                                     word2 = random_words_datas[1].word,
                                     example = sentence,
                                     example_mean = translate).first().id
+        user_value = user_data(
+            username = session['username'],
+            index = index
+        )
+        db.session.add(user_value)
+        db.session.commit()
         return render_template("home/word_learn.html", title = "toeic",
                                original_datas = random_words_datas,
                                gpt_data = gpt_values, index = index)
