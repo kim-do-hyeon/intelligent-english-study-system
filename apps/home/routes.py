@@ -48,7 +48,7 @@ def learn(subpath) :
                                gpt_data = gpt_values, index = index)
 
 @blueprint.route('/ajax', methods=['GET', 'POST'])
-# @login_required
+@login_required
 def ajax() :
     data = request.get_json()
     index = int(data['value'])
@@ -63,6 +63,7 @@ def ajax() :
         gpt_data.query.filter_by(id=index).update(dict(bug_count=int(bug_count)))
         db.session.commit()
         return jsonify(result = "success")
+    
 @blueprint.route('/admin/<path:subpath>', methods=['GET', 'POST'])
 # @login_required
 def admin(subpath) :
