@@ -8,6 +8,10 @@ class Users(db.Model, UserMixin):
     username = db.Column(db.String(64), unique=True)
     email = db.Column(db.String(64), unique=True)
     password = db.Column(db.LargeBinary)
+    school = db.Column(db.String(64))
+    number = db.Column(db.String(64))
+    admin = db.Column(db.Integer, default = 0)
+    apply = db.Column(db.Integer, default = 0)
     def __init__(self, **kwargs):
         for property, value in kwargs.items():
             if hasattr(value, '__iter__') and not isinstance(value, str):

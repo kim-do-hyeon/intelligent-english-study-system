@@ -63,6 +63,20 @@
                                         </div>
                                         <!-- End of Form -->
                                     </div>
+                                    <div class="form-group mb-4">
+                                        <label for="email">학교명</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text" id="basic-addon3"><span class="fas fa-envelope"></span></span>
+                                            {{ form.school(class="form-control") }}
+                                        </div>  
+                                    </div>
+                                    <div class="form-group mb-4">
+                                        <label for="email">학번</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text" id="basic-addon3"><span class="fas fa-envelope"></span></span>
+                                            {{ form.number(class="form-control") }}
+                                        </div>  
+                                    </div>
                                     <div class="d-grid">
                                         <button type="submit" name="register" class="btn btn-primary">회원 등록</button>
                                     </div>
