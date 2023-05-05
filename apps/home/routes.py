@@ -5,7 +5,7 @@ import pandas as pd
 from apps import db
 from apps.home import blueprint
 from apps.home.get_sentence_module import *
-from apps.authentication.models import Excel_Data, word_data, gpt_data, user_word_data, user_data
+from apps.authentication.models import Users, Excel_Data, word_data, gpt_data, user_word_data, user_data
 from flask import render_template, request, redirect, flash, jsonify, session
 from flask_login import login_required
 from jinja2 import TemplateNotFound
@@ -17,8 +17,9 @@ def index():
     return render_template('home/index.html', segment='index')
 
 @blueprint.route('/learn/<path:subpath>')
-@login_required
+# @login_required
 def learn(subpath) :
+    print(subpath)
     if subpath == "toeic" :
         total_datas = word_data.query.all()
         randon_word_indexs = random.sample(range(0,len(total_datas)),2)
@@ -68,13 +69,10 @@ def ajax() :
 # @login_required
 def admin(subpath) :
     subpath = subpath.split("/")
-    # 단어장 관리
     if subpath[0] == "upload" :
-        # 단어장 조회
         if subpath[1] == "word" :
             data = Excel_Data.query.all()
             return render_template('home/upload_excel.html', data = data)
-        # 단어장 등록
         elif subpath[1] == "excel" :
             upload = request.files.getlist("file[]")
             for f in upload :
@@ -84,6 +82,22 @@ def admin(subpath) :
                 db.session.add(data)
             db.session.commit()
             flash("엑셀 파일이 등록되었습니다.")
+            return redirect('/admin/upload/word')
+        elif subpath[1] == "apply" :
+            data = Excel_Data.query.filter_by(id = subpath[2]).update(dict(active=1))
+            db.session.commit()
+            flash("엑셀 파일의 권한이 수정되었습니다.")
+            return redirect('/admin/upload/word')
+        elif subpath[1] == "unapply" :
+            data = Excel_Data.query.filter_by(id = subpath[2]).update(dict(active=0))
+            db.session.commit()
+            flash("엑셀 파일의 권한이 수정되었습니다.")
+            return redirect('/admin/upload/word')
+        elif subpath[1] == "delete" :
+            data = Excel_Data.query.filter_by(id = subpath[2]).first()
+            db.session.delete(data)
+            db.session.commit()
+            flash("파일이 삭제되었습니다.")
             return redirect('/admin/upload/word')
     elif subpath[0] == "management" :
         if subpath[1] == "database" :
@@ -154,29 +168,41 @@ def admin(subpath) :
                     db.session.delete(data)
                     db.session.commit()
                     return redirect("/admin/management/database/view")
-        
-
-        # 단어장 적용
+    elif subpath[0] == "user" :
+        if subpath[1] == "view" :
+            if subpath[2] == "all" :
+                datas = Users.query.all()
+                return render_template('home/user.html', 
+                                    data = datas)
+            elif subpath[2] == "permission" :
+                datas = Users.query.all()
+                return render_template('home/user_permission.html', 
+                                    data = datas)
         elif subpath[1] == "apply" :
-            data = Excel_Data.query.filter_by(id = subpath[2]).update(dict(active=1))
-            db.session.commit()
-            flash("엑셀 파일의 권한이 수정되었습니다.")
-            return redirect('/admin/upload/word')
-        # 단어장 적용 철회
+            if subpath[2] == "admin" :
+                data = Users.query.filter_by(id = subpath[3]).update(dict(admin=1))
+                db.session.commit()
+                return redirect('/admin/user/view/all')
+            elif subpath[2] == "permission" : 
+                data = Users.query.filter_by(id = subpath[3]).update(dict(apply=1))
+                db.session.commit()
+                return redirect('/admin/user/view/permission')
         elif subpath[1] == "unapply" :
-            data = Excel_Data.query.filter_by(id = subpath[2]).update(dict(active=0))
-            db.session.commit()
-            flash("엑셀 파일의 권한이 수정되었습니다.")
-            return redirect('/admin/upload/word')
-        # 단어장 삭제
+            if subpath[2] == "admin" :
+                data = Users.query.filter_by(id = subpath[3]).update(dict(admin=0))
+                db.session.commit()
+                return redirect('/admin/user/view/all')
+            elif subpath[2] == "permission" : 
+                data = Users.query.filter_by(id = subpath[3]).update(dict(apply=0))
+                db.session.commit()
+                return redirect('/admin/user/view/permission')
         elif subpath[1] == "delete" :
-            data = Excel_Data.query.filter_by(id = subpath[2]).first()
-            db.session.delete(data)
-            db.session.commit()
-            flash("파일이 삭제되었습니다.")
-            return redirect('/admin/upload/word')
-
-
+            if subpath[2] == "admin" :
+                data = Users.query.filter_by(id = subpath[3]).first()
+                db.session.delete(data)
+                db.session.commit()
+                return redirect('/admin/user/view/all')
+            
 @blueprint.route('/<template>')
 # @login_required
 def route_template(template):

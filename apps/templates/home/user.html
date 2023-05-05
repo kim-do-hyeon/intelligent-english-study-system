@@ -1,0 +1,91 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}{% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+    <main>
+        
+        {% include 'includes/preloader.html' %}
+
+        <!-- Hero -->
+        <div class="section-header pb-6 bg-primary text-white">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-md-8 text-center">
+                        <h1 class="display-3 mb-4">유저 관리</h1>
+                        <p class="lead mb-5">해당 페이지에서는 유저들을 관리합니다.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- End of Hero -->
+        <div class="section section-md">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-12">
+                        <div class="mb-5">
+                            <table class="table align-items-center mb-0">
+                                <thead>
+                                  <tr class="align-middle text-center">
+                                    <th class="text-uppercase text-secondary font-weight-bolder opacity-7">인덱스</th>
+                                    <th class="text-uppercase text-secondary font-weight-bolder opacity-7">유저명</th>
+                                    <th class="text-uppercase text-secondary font-weight-bolder opacity-7">이메일</th>
+                                    <th class="text-uppercase text-secondary font-weight-bolder opacity-7">학교명</th>
+                                    <th class="text-uppercase text-secondary font-weight-bolder opacity-7">학번</th>
+                                    <th class="text-uppercase text-secondary font-weight-bolder opacity-7">관리자</th>
+                                    <th class="text-uppercase text-secondary font-weight-bolder opacity-7">유저 삭제</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {% for i in data %}
+                                  <tr>
+                                    <td class="align-middle text-center">
+                                      <p class="text-xs font-weight-bold mb-0">{{i.id}}</p>
+                                    </td>
+                                    <td class="align-middle text-center">
+                                      <p class="text-xs font-weight-bold mb-0">{{i.username}}</p>
+                                    </td>
+                                    <td class="align-middle text-center">
+                                      <p class="text-xs font-weight-bold mb-0">{{i.email}}</p>
+                                    </td>
+                                    <td class="align-middle text-center">
+                                      <p class="text-xs font-weight-bold mb-0">{{i.school}}</p>
+                                    </td>
+                                    <td class="align-middle text-center">
+                                      <p class="text-xs font-weight-bold mb-0">{{i.number}}</p>
+                                    </td>
+                                    <td class="align-middle text-center">
+                                      {% if i.admin == 0 %}
+                                        <p class="text-xs font-weight-bold mb-0">일반유저</p>
+                                      {% elif i.admin == 1 %}
+                                        <p class="text-xs font-weight-bold mb-0">관리자</p>
+                                      {% else %}
+                                        <p class="text-xs font-weight-bold mb-0">오류</p>
+                                      {% endif %}
+                                      <button class="btn btn-success" onclick="location.href='/admin/user/apply/admin/{{i.id}}'">등록</button>
+                                      <button class="btn btn-danger" onclick="location.href='/admin/user/unapply/admin/{{i.id}}'">해제</button>
+                                    </td>
+                                    <td class="align-middle text-center">
+                                      <button class="btn btn-warning" onclick="location.href='/admin/user/delete/admin/{{i.id}}'">삭제</button>
+                                    </td>
+                                  </tr>
+                                  {% endfor %}
+                                </tbody>
+                              </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}
