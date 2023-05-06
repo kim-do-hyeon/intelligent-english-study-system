@@ -19,10 +19,53 @@
                 </div>
             </div>
         </div>
-        
         <!-- End of Hero -->
         <div class="section section-md">
             <div class="container">
+                <!-- Modal Content -->
+                <div class="modal fade show" id="modal-default" tabindex="-1" role="dialog" aria-labelledby="modal-default"
+                    aria-hidden="true" style="display: block;">
+                    <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 800px;">
+                        {% if session['group'] == "X" %}
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h2 class="h6 modal-title">프로젝트 설명</h2>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close" onclick="close_modal()"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>본 시스템은 다음과 같은 목적으로 만들어졌습니다.</p>
+                                <p><span style="color: red;">모집단 A</span>의 경우 GPT를 이용해서 만들어진 예문을 함께 학습합니다.</p>
+                                <p><span style="color: blue;">모집단 B</span>의 경우 단어장에서 제공된 예문을 통해서만 학습합니다.</p>
+                                <br>
+                                <p>모집단 A의 경우 학습자가 학습을 마치고, 테스트를 진행합니다.<br>
+                                    그 후 틀린 어휘의 경우 틀린 어휘 + (같이 학습하지 않은 어휘)를 통하여
+                                    새로 학습을 진행합니다. 다음과 같은 예시가 있습니다.<br>
+                                    만약, 모집단 A의 학습자가 'resume' 와 'disappointed' 두개의 어휘와 함께 만들어진 예문으로 학습을 하였다고 가정할때,<br>
+                                    두개의 어휘 중 'disappointed'의 어휘를 틀렸다면, 'resume'가 아닌 다른 어휘를 불러와 새로 학습을 진행합니다.<br>
+                                    그럼에도 불구하고, 또 같은 어휘를 틀리게 된다면, 다시 한번 다른 어휘를 불러와 새로 학습을 진행합니다<div class=""></div>
+                                </p>
+                                <p>이를 통해, 어떤 어휘와 함께 학습하였을때, 암기력 및 통과율이 높은지를 판단하는 작업을 진행합니다.</p>
+                                <p>뿐만 아니라, 모집단 A와 모집단 B의 차이점은 A의 경우 n개의 어휘로 이루어진 예문을 함께 학습합니다.</p>
+                                <p>모집단 B의 경우는 단어장에 나온 1개의 단어 + 1개의 예문으로 학습을 진행합니다.</p>
+                                <p>이를 통해, 1개씩 어휘 + 예문을 학습하는 경우와 n개의 어휘로 이루어진 예문으로 학습하는 경우를 나눠<br>
+                                    어떤 방법으로 학습할 때 더욱 높은 효율이 발생하는지를 판단하는 작업을 진행합니다.</p>
+                                <p>집단을 1회 선택하면, 변경 할 수 없습니다. 변경을 원하신다면 pental@kakao.com 으로 문의주시면 감사하겠습니다.</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" onclick="ajax('group_a')">모집단 A군 선택</button>
+                                <button type="button" class="btn btn-secondary" onclick="ajax('group_b')">모집단 B군 선택</button>
+                                <button type="button" class="btn btn-link ms-auto"
+                                    onclick="close_modal()">닫기</button>
+                            </div>
+                        </div>
+                        {% else %}
+                        <script>window.onload = function(){
+                            close_modal()
+                        }</script>
+                        {% endif %}
+                    </div>
+                </div>
                 <div class="row justify-content-center">
                     <div class="col-6">
                         <div class="mb-4">
@@ -88,10 +131,12 @@
                         <div class="card shadow mb-6">
                             <div class="card-body px-5 py-5 text-center text-md-left">
                                 <div class="row align-items-center">
+                                    {% if session['group'] == "A" %}
                                     <h2>{{gpt_data[0]}}</h2>
                                     <p class="mb-0">
                                         {{gpt_data[1]}}
                                     </p><br><br>
+                                    {% endif %}
                                     <div class="col-12">
                                         <a href="/learn/{{title}}" class="btn btn-primary">
                                             <span class="me-1">
@@ -117,38 +162,55 @@
                         </div>
                     </div>
                 </div>
-                <script>
-                    function ajax(data_type){
-                        if(data_type == "add_word_data"){
-                            var postdata = {'type':'add_word_data', 'value' : '{{index}}'}
-                        }else if(data_type == "report"){
-                            var postdata = {'type':'report', 'value' : '{{index}}'}
-                        }
-                        
-                        $.ajax({
-                            type: 'POST',
-                            url: '/ajax',
-                            data : JSON.stringify(postdata),
-                            dataType : 'JSON',
-                            contentType: "application/json",
-                            success: function (response) {
-                                if(data_type == "add_word_data"){
-                                    alert("단어장에 추가되었습니다.");
-                                }else if(data_type == "report"){
-                                    alert("정상적으로 버그가 신고되었습니다.")
-                                }
-                                
-                            },
-                            error: function(request, status, error){
-                                alert('통신 실패')
-                                alert(error);
-                            }
-                        })
-                    }
-                </script>
             </div>
         </div>
     </main>
+    <script>
+        function ajax(data_type){
+            if(data_type == "add_word_data"){
+                var postdata = {'type':'add_word_data', 'value' : '{{index}}'}
+            }else if(data_type == "report"){
+                var postdata = {'type':'report', 'value' : '{{index}}'}
+            }else if(data_type == "group_a"){
+                var postdata = {'type' : 'group', 'value' : 'A', 'username' : '{{session["username"]}}'}
+            }else if(data_type == "group_b"){
+                var postdata = {'type' : 'group', 'value' : 'B', 'username' : '{{session["username"]}}'}
+            }
+            
+            $.ajax({
+                type: 'POST',
+                url: '/ajax',
+                data : JSON.stringify(postdata),
+                dataType : 'JSON',
+                contentType: "application/json",
+                success: function (response) {
+                    if(data_type == "add_word_data"){
+                        alert("단어장에 추가되었습니다.");
+                    }else if(data_type == "report"){
+                        alert("정상적으로 버그가 신고되었습니다.")
+                    }else if(data_type == 'group_a'){
+                        alert("모집단 A로 등록되었습니다. 페이지가 새로고침됩니다.")
+                        window.location.reload();
+                    }else if(data_type == 'group_b'){
+                        alert("모집단 B로 등록되었습니다. 페이지가 새로고침됩니다.")
+                        window.location.reload();
+                    }
+                    
+                },
+                error: function(request, status, error){
+                    alert('통신 실패')
+                    alert(error);
+                }
+            })
+        }
+    </script>
+    <script>
+        function close_modal(){
+            var btn = document.getElementById("modal-default");
+            btn.classList.value = "modal fade";
+            btn.style.display = "none";
+        }
+    </script>
 
 {% endblock content %}
 

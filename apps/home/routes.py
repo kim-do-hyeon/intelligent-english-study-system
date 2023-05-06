@@ -19,7 +19,10 @@ def index():
 @blueprint.route('/learn/<path:subpath>')
 # @login_required
 def learn(subpath) :
-    print(subpath)
+    group = Users.query.filter_by(username = session['username']).first().group
+    if group == "A" : session['group'] = "A"
+    elif group == "B" : session['group'] = "B"
+    else : session['group'] = "X"
     if subpath == "toeic" :
         total_datas = word_data.query.all()
         randon_word_indexs = random.sample(range(0,len(total_datas)),2)
@@ -52,18 +55,25 @@ def learn(subpath) :
 @login_required
 def ajax() :
     data = request.get_json()
-    index = int(data['value'])
     if data['type'] == "add_word_data" :
+        index = int(data['value'])
         username = session['username']
         database_data = user_word_data(username = username, index = index)
         db.session.add(database_data)
         db.session.commit()
         return jsonify(result = 'success')
     elif data['type'] == "report" :
+        index = int(data['value'])
         bug_count = gpt_data.query.filter_by(id=index).first().bug_count + 1
         gpt_data.query.filter_by(id=index).update(dict(bug_count=int(bug_count)))
         db.session.commit()
         return jsonify(result = "success")
+    elif data['type'] == "group" :
+        username = data['username']
+        select_group = data['value']
+        data = Users.query.filter_by(username = username).update(dict(group=select_group))
+        db.session.commit()
+        return jsonify(result = 'success')
     
 @blueprint.route('/admin/<path:subpath>', methods=['GET', 'POST'])
 # @login_required

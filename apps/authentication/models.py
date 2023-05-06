@@ -12,6 +12,7 @@ class Users(db.Model, UserMixin):
     number = db.Column(db.String(64))
     admin = db.Column(db.Integer, default = 0)
     apply = db.Column(db.Integer, default = 0)
+    group = db.Column(db.String(64))
     def __init__(self, **kwargs):
         for property, value in kwargs.items():
             if hasattr(value, '__iter__') and not isinstance(value, str):
