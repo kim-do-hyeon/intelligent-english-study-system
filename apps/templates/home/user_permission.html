@@ -38,6 +38,7 @@
                                     <th class="text-uppercase text-secondary font-weight-bolder opacity-7">학교명</th>
                                     <th class="text-uppercase text-secondary font-weight-bolder opacity-7">학번</th>
                                     <th class="text-uppercase text-secondary font-weight-bolder opacity-7">적용 여부</th>
+                                    <th class="text-uppercase text-secondary font-weight-bolder opacity-7">그룹</th>
                                   </tr>
                                 </thead>
                                 <tbody>
@@ -68,6 +69,10 @@
                                       {% endif %}
                                       <button class="btn btn-success" onclick="location.href='/admin/user/apply/permission/{{i.id}}'">등록</button>
                                       <button class="btn btn-danger" onclick="location.href='/admin/user/unapply/permission/{{i.id}}'">해제</button>
+                                    </td>
+                                    <td class="align-middle text-center">
+                                      <p class="text-xs font-weight-bold mb-0">{{i.group}}</p>
+                                      <button class="btn btn-success" onclick="location.href='/admin/user/reset/group/{{i.id}}'">초기화</button>
                                     </td>
                                   </tr>
                                   {% endfor %}

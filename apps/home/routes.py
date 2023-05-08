@@ -212,6 +212,11 @@ def admin(subpath) :
                 db.session.delete(data)
                 db.session.commit()
                 return redirect('/admin/user/view/all')
+        elif subpath[1] == "reset" :
+            if subpath[2] == "group" :
+                data = Users.query.filter_by(id = subpath[3]).update(dict(group="X"))
+                db.session.commit()
+                return redirect('/admin/user/view/permission')
             
 @blueprint.route('/<template>')
 # @login_required
