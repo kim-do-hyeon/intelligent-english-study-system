@@ -1,0 +1,70 @@
+{% extends "layouts/base.html" %}
+{% block title %}{% endblock %} 
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+{% block content %}
+    <main>
+        {% include 'includes/preloader.html' %}
+
+        <!-- Hero -->
+        <div class="section-header pb-6 bg-primary text-white">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-md-8 text-center">
+                        <h1 class="display-3 mb-4">단어장 관리</h1>
+                        <p class="lead mb-5">해당 페이지에서는 학습자가 추가한 단어를 공부합니다.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- End of Hero -->
+        <div class="section section-md">
+            <div class="container">
+                <div class="row">
+                    {% for i in data %}
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="toast fade show" role="alert" aria-live="assertive" aria-atomic="true">
+                              <div class="toast-header">
+                                  <strong class="me-auto">{{i[0].word}}</strong>
+                                  <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                              </div>
+                              <div class="toast-body">
+                                  {{i[0].mean}}
+                              </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-4 mb-4">
+                          <div class="toast fade show" role="alert" aria-live="assertive" aria-atomic="true">
+                            <div class="toast-header">
+                                <strong class="me-auto">{{i[1].word}}</strong>
+                                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                            </div>
+                            <div class="toast-body">
+                                {{i[1].mean}}
+                            </div>
+                          </div>
+                      </div>
+                      <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="toast bg-primary text-white fade show" role="alert" aria-live="assertive"
+                            aria-atomic="true">
+                            <div class="toast-header">
+                                <strong class="me-auto">{{i[2].example}}</strong>
+                                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                            </div>
+                            <div class="toast-body">
+                                {{i[2].example_mean}}
+                            </div>
+                        </div>
+                      </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}

@@ -50,6 +50,22 @@ def learn(subpath) :
         return render_template("home/word_learn.html", title = "toeic",
                                original_datas = random_words_datas,
                                gpt_data = gpt_values, index = index)
+    elif subpath == "vocabulary_list" :
+        user_word_datas = user_word_data.query.filter_by(username = session['username']).all()
+        user_word_data_index = []
+        for i in user_word_datas :
+            user_word_data_index.append(i.index)
+        gpt_datas = []
+        for i in user_word_data_index :
+            gpt_datas.append(gpt_data.query.filter_by(id = i).first())
+        datas = []
+        for i in gpt_datas :
+            temp = []
+            temp.append(word_data.query.filter_by(word = i.word1).first())
+            temp.append(word_data.query.filter_by(word = i.word2).first())
+            temp.append(i)
+            datas.append(temp)
+        return render_template("home/vocabulary_list.html", data = datas)
 
 @blueprint.route('/ajax', methods=['GET', 'POST'])
 @login_required
