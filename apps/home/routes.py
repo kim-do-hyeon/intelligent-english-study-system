@@ -48,9 +48,12 @@ def learn(subpath) :
         )
         db.session.add(user_value)
         db.session.commit()
+        total_learn_data = len(user_data.query.filter_by(username = session['username']).all())
+
         return render_template("home/word_learn.html", title = "toeic",
                                original_datas = random_words_datas,
-                               gpt_data = gpt_values, index = index)
+                               gpt_data = gpt_values, index = index,
+                               total_learn_data = total_learn_data)
     elif subpath == "vocabulary_list" :
         user_word_datas = user_word_data.query.filter_by(username = session['username']).all()
         user_word_data_index = []
@@ -76,12 +79,41 @@ def exam(subpath) :
         max_count = 20
         session['username'] = "pental"
         random_word, fake_mean = get_word(session['username'])
+        if len(random_word) == 0 :
+            flash("응시 데이터가 부족합니다. 최소 20단어 이상 학습해주세요.")
+            return redirect("/index")
         return render_template("home/exam.html",
                                random_word = random_word,
                                 fake_mean = fake_mean,
                                 current_question = count,
                                 total_question = max_count)
-    
+    elif subpath == "result" :
+        session['username'] = "pental"
+        exam_user_data = exam_data.query.filter_by(username = session['username']).all()[-20:]
+        question_serial_check = []
+        for i in exam_user_data : question_serial_check.append(i.question_count)
+        check_list = list(range(1, 21))
+        for i in range(len(check_list)) :
+            if check_list[i] != question_serial_check[i] :
+                flash("시험 데이터가 손상되었습니다. 다시 시험을 응시해주세요.")
+                return redirect("/index")
+        
+        ''' DB Write for Pass or Fail '''
+        for i in exam_user_data :
+            gpt_data_index = gpt_data.query.filter_by(word1 = i.word).first()
+            gpt_data_index = gpt_data_index.id
+            user_learn_data_checking_index = user_data.query.filter_by(username = session['username'], index = gpt_data_index).first()
+            user_learn_data_pass_count = user_learn_data_checking_index.pass_count
+            user_learn_data_fail_count = user_learn_data_checking_index.fail_count
+            if i.check == 1 :
+                user_data.query.filter_by(id = user_learn_data_checking_index.id).update(dict(pass_count = int(user_learn_data_pass_count) + 1))
+            elif i.check == 0 :
+                user_data.query.filter_by(id = user_learn_data_checking_index.id).update(dict(fail_count = int(user_learn_data_fail_count) + 1))
+        db.session.commit()
+        
+        
+        
+        return "A"
 @blueprint.route('/exam_ajax', methods=['GET', 'POST'])
 # @login_required
 def exam_ajax() :
