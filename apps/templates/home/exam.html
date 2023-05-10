@@ -57,22 +57,24 @@
                 success: function (response) {
                   if(response['process'] == 'close'){
                     alert("시험을 종료합니다.");
+                    return;
+                  }else{
+                    var question_count = response['question_count'];
+                    var question_word = response['random_word']['question'];                  
+                    $("#current_question").empty();
+                    $("#current_question").append(question_count);
+                    $("#question").empty();
+                    $("#question").append(question_word);
+                    $("#fake_means").empty();
+                    $("#question_index").empty();
+                    $("#question_index").append(response['random_word']['index']);
+                    for(var i = 0; i < response['fake_mean'].length; i++){
+                      console.log(response['fake_mean'][i]['mean']);
+                      var str = '';
+                      str += '<button class="btn btn-lg btn-primary" type="button" style="width: 15%;"' + 'onclick="exam_ajax(' + response['fake_mean'][i]['index'] + ')" >' + response['fake_mean'][i]['mean'] + '</button>'
+                      $("#fake_means").append(str);
+                    }
                   }
-                  var question_count = response['question_count'];
-                  var question_word = response['random_word']['question'];                  
-                  $("#current_question").empty();
-                  $("#current_question").append(question_count);
-                  $("#question").empty();
-                  $("#question").append(question_word);
-                  $("#fake_means").empty();
-                  $("#question_index").empty();
-                  $("#question_index").append(response['random_word']['index']);
-                  for(var i = 0; i < response['fake_mean'].length; i++){
-                    console.log(response['fake_mean'][i]['mean']);
-                    var str = '';
-                    str += '<button class="btn btn-lg btn-primary" type="button" style="width: 15%;"' + 'onclick="exam_ajax(' + response['fake_mean'][i]['index'] + ')" >' + response['fake_mean'][i]['mean'] + '</button>'
-                    $("#fake_means").append(str);
-                  } 
                 },
                 error: function(request, status, error){
                     alert('통신 실패')

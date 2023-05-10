@@ -87,8 +87,6 @@ def exam(subpath) :
 def exam_ajax() :
     data = request.get_json()
     if data['type'] == 'post' :
-        if data['current_question_index'] == 20 :
-            return jsonify(result = 'success', process='close')
         test_word_index = word_data.query.filter_by(id = data['word_index']).first()
         test_word = test_word_index.word
         test_mean = test_word_index.mean
@@ -111,7 +109,8 @@ def exam_ajax() :
         db.session.add(exam)
         db.session.commit()
         random_word, fake_mean = get_word(session['username'])
-        print(random_word)
+        if data['current_question_index'] == 20 :
+            return jsonify(result = 'success', process='close')
         return jsonify(result = 'success',
                     question_count = question_count + 1,
                     random_word = random_word,
