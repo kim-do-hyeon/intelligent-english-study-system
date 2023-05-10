@@ -5,11 +5,12 @@ import pandas as pd
 from apps import db
 from apps.home import blueprint
 from apps.home.get_sentence_module import *
-from apps.authentication.models import Users, Excel_Data, word_data, gpt_data, user_word_data, user_data
+from apps.authentication.models import Users, Excel_Data, word_data, gpt_data, user_word_data, user_data, exam_data
 from flask import render_template, request, redirect, flash, jsonify, session
 from flask_login import login_required
 from jinja2 import TemplateNotFound
 from werkzeug.utils import secure_filename
+from apps.home.exam import get_word
 
 @blueprint.route('/index')
 # @login_required
@@ -66,6 +67,57 @@ def learn(subpath) :
             temp.append(i)
             datas.append(temp)
         return render_template("home/vocabulary_list.html", data = datas)
+
+@blueprint.route('/exam/<path:subpath>', methods=['GET', 'POST'])
+# @login_required
+def exam(subpath) :
+    if subpath == "toeic" :
+        count = 1
+        max_count = 20
+        session['username'] = "pental"
+        random_word, fake_mean = get_word(session['username'])
+        return render_template("home/exam.html",
+                               random_word = random_word,
+                                fake_mean = fake_mean,
+                                current_question = count,
+                                total_question = max_count)
+    
+@blueprint.route('/exam_ajax', methods=['GET', 'POST'])
+# @login_required
+def exam_ajax() :
+    data = request.get_json()
+    if data['type'] == 'post' :
+        if data['current_question_index'] == 20 :
+            return jsonify(result = 'success', process='close')
+        test_word_index = word_data.query.filter_by(id = data['word_index']).first()
+        test_word = test_word_index.word
+        test_mean = test_word_index.mean
+        test_index = data['word_index']
+        test_select_mean_index = word_data.query.filter_by(id = data['index']).first()
+        print(test_word_index, test_select_mean_index)
+        test_select_mean = test_select_mean_index.mean
+        check = 0
+        if(test_mean == test_select_mean) :
+            check = 1
+        question_count = data['current_question_index']
+        exam = exam_data(username = session['username'],
+                        word = test_word,
+                        mean = test_mean,
+                        index = test_index,
+                        select_mean = test_select_mean,
+                        question_count = question_count,
+                        check = check
+                        )
+        db.session.add(exam)
+        db.session.commit()
+        random_word, fake_mean = get_word(session['username'])
+        print(random_word)
+        return jsonify(result = 'success',
+                    question_count = question_count + 1,
+                    random_word = random_word,
+                    fake_mean = fake_mean)
+        
+
 
 @blueprint.route('/ajax', methods=['GET', 'POST'])
 @login_required

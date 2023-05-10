@@ -68,6 +68,19 @@ class user_data(db.Model, UserMixin) :
     fail_count = db.Column(db.Integer, default = 0)
     rate = db.Column(db.Float, default = 0.0)
 
+class exam_data(db.Model, UserMixin) :
+    __tablename__ = 'eaxm_data'
+    id = db.Column(db.Integer, primary_key = True)
+    username = db.Column(db.Text)
+    word = db.Column(db.Text)
+    mean = db.Column(db.Text)
+    index = db.Column(db.Integer)
+    select_mean = db.Column(db.Text)
+    question_count = db.Column(db.Integer)
+    check = db.Column(db.Integer)
+    
+
+
 @login_manager.user_loader
 def user_loader(id):
     return Users.query.filter_by(id=id).first()

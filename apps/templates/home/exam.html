@@ -1,0 +1,88 @@
+{% extends "layouts/base.html" %}
+{% block title %}{% endblock %} 
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+{% block content %}
+    <main>
+        {% include 'includes/preloader.html' %}
+        <!-- Hero -->
+        <div class="section-header pb-6 bg-primary text-white">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-md-8 text-center">
+                        <h1 class="display-3 mb-4">테스트 페이지</h1>
+                        <p class="lead mb-5">
+                          해당 페이지에서는 실제 테스트를 진행합니다.<br>
+                          최근에 학습한 20단어를 바탕으로 테스트를 진행합니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- End of Hero -->
+        <div class="section section-md">
+            <div class="container">
+                <div class="row">
+                  <div class="col-12" style="text-align: center;">
+                    <h1>Question</h1>
+                    <h3 id="question" style="color: blue;">{{random_word['question']}}</h3><br>
+                    <p id="question_index" style="display: none;">{{random_word['index']}}</p>
+                  </div>
+                  <div id="fake_means" class="col-12" style="text-align: center;">
+                    {% for i in fake_mean %}
+                      <button class="btn btn-lg btn-primary" type="button" style="width: 15%;" onclick="exam_ajax({{i['index']}})" >{{i['mean']}}</button>
+                    {% endfor %}
+                  </div>
+                </div>
+                <!-- <div class="row" style="float: right;"> -->
+                <div style="float: right;">
+                  <span id="current_question">{{current_question}}</span> / <span id="total_question">{{total_question}}</span>
+                </div>
+                <!-- </div> -->
+            </div>
+        </div>
+    </main>
+    <script>
+      function exam_ajax(index){
+            var current_question = parseInt(document.getElementById("current_question").textContent);
+            var question_index = parseInt(document.getElementById("question_index").textContent);
+            var postdata = {'type' : 'post', 'index' : index, 'current_question_index' : current_question, 'word_index' : question_index}
+            $.ajax({
+                type: 'POST',
+                url: '/exam_ajax',
+                data : JSON.stringify(postdata),
+                dataType : 'JSON',
+                contentType: "application/json",
+                success: function (response) {
+                  if(response['process'] == 'close'){
+                    alert("시험을 종료합니다.");
+                  }
+                  var question_count = response['question_count'];
+                  var question_word = response['random_word']['question'];                  
+                  $("#current_question").empty();
+                  $("#current_question").append(question_count);
+                  $("#question").empty();
+                  $("#question").append(question_word);
+                  $("#fake_means").empty();
+                  $("#question_index").empty();
+                  $("#question_index").append(response['random_word']['index']);
+                  for(var i = 0; i < response['fake_mean'].length; i++){
+                    console.log(response['fake_mean'][i]['mean']);
+                    var str = '';
+                    str += '<button class="btn btn-lg btn-primary" type="button" style="width: 15%;"' + 'onclick="exam_ajax(' + response['fake_mean'][i]['index'] + ')" >' + response['fake_mean'][i]['mean'] + '</button>'
+                    $("#fake_means").append(str);
+                  } 
+                },
+                error: function(request, status, error){
+                    alert('통신 실패')
+                    alert(error);
+                }
+            })
+        }
+    </script>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}
