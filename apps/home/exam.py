@@ -4,9 +4,9 @@ import random
 
 def get_word(username):
     user_word_datas = user_data.query.filter_by(username = username).all()
-    user_word_index = []
-    if len(user_word_index) < 20 :
+    if len(user_word_datas) < 20 :
         return [], []
+    user_word_index = []
     for i in user_word_datas : user_word_index.append(i.index)
     gpt_datas = []
     for i in user_word_index : gpt_datas.append(gpt_data.query.filter_by(id = i).first())
@@ -34,4 +34,5 @@ def get_word(username):
     temp['index'] = random_word['index']
     fake_mean.append(temp)
     random.shuffle(fake_mean)
+    print(random_word, fake_mean)
     return random_word, fake_mean
