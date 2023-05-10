@@ -5,6 +5,8 @@ import random
 def get_word(username):
     user_word_datas = user_data.query.filter_by(username = username).all()
     user_word_index = []
+    if len(user_word_index) < 20 :
+        return [], []
     for i in user_word_datas : user_word_index.append(i.index)
     gpt_datas = []
     for i in user_word_index : gpt_datas.append(gpt_data.query.filter_by(id = i).first())
