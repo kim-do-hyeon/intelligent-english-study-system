@@ -50,7 +50,7 @@
             var postdata = {'type' : 'post', 'index' : index, 'current_question_index' : current_question, 'word_index' : question_index}
             $.ajax({
                 type: 'POST',
-                url: '/exam_ajax',
+                url: '/ajax',
                 data : JSON.stringify(postdata),
                 dataType : 'JSON',
                 contentType: "application/json",
