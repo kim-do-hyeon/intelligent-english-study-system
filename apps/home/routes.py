@@ -97,28 +97,35 @@ def exam(subpath) :
             if check_list[i] != question_serial_check[i] :
                 flash("시험 데이터가 손상되었습니다. 다시 시험을 응시해주세요.")
                 return redirect("/index")
+
+            if exam_user_data[i].db_write == 1 :
+                flash("시험 데이터가 손상되었습니다. 다시 시험을 응시해주세요.")
+                return redirect("/index")
         
         ''' User Word DB & GPT DB Write for Pass or Fail '''
         for i in exam_user_data :
-            gpt_data_index = gpt_data.query.filter_by(word1 = i.word).first()
-            gpt_learn_data_pass_count = gpt_data_index.pass_count
-            gpt_learn_data_fail_count = gpt_data_index.fail_count
-            user_learn_data_checking_index = user_data.query.filter_by(username = session['username'], index = gpt_data_index.id).first()
-            user_learn_data_pass_count = user_learn_data_checking_index.pass_count
-            user_learn_data_fail_count = user_learn_data_checking_index.fail_count
+            if i.db_write == 0 :
+                gpt_data_index = gpt_data.query.filter_by(word1 = i.word).first()
+                gpt_learn_data_pass_count = gpt_data_index.pass_count
+                gpt_learn_data_fail_count = gpt_data_index.fail_count
+                user_learn_data_checking_index = user_data.query.filter_by(username = session['username'], index = gpt_data_index.id).first()
+                user_learn_data_pass_count = user_learn_data_checking_index.pass_count
+                user_learn_data_fail_count = user_learn_data_checking_index.fail_count
 
-            if i.check == 1 :
-                user_data.query.filter_by(id = user_learn_data_checking_index.id).update(dict(pass_count = int(user_learn_data_pass_count) + 1))
-                gpt_data.query.filter_by(id = gpt_data_index.id).update(dict(pass_count = int(gpt_learn_data_pass_count) + 1))
-            elif i.check == 0 :
-                user_data.query.filter_by(id = user_learn_data_checking_index.id).update(dict(fail_count = int(user_learn_data_fail_count) + 1))
-                gpt_data.query.filter_by(id = gpt_data_index.id).update(dict(fail_count = int(gpt_learn_data_fail_count) + 1))
-            
-            ''' DB Write for Analyze '''
-            gpt_learn_data_pass_count = gpt_data_index.pass_count
-            gpt_learn_data_fail_count = gpt_data_index.fail_count
-            rate = int(gpt_learn_data_pass_count) / int(gpt_learn_data_fail_count)
-            gpt_data.query.filter_by(id = gpt_data_index.id).update(dict(rate = rate))
+                if i.check == 1 :
+                    user_data.query.filter_by(id = user_learn_data_checking_index.id).update(dict(pass_count = int(user_learn_data_pass_count) + 1))
+                    gpt_data.query.filter_by(id = gpt_data_index.id).update(dict(pass_count = int(gpt_learn_data_pass_count) + 1))
+                elif i.check == 0 :
+                    user_data.query.filter_by(id = user_learn_data_checking_index.id).update(dict(fail_count = int(user_learn_data_fail_count) + 1))
+                    gpt_data.query.filter_by(id = gpt_data_index.id).update(dict(fail_count = int(gpt_learn_data_fail_count) + 1))
+                
+                ''' DB Write for Analyze '''
+                gpt_learn_data_pass_count = gpt_data_index.pass_count
+                gpt_learn_data_fail_count = gpt_data_index.fail_count
+                rate = int(gpt_learn_data_pass_count) / int(gpt_learn_data_fail_count)
+                gpt_data.query.filter_by(id = gpt_data_index.id).update(dict(rate = rate))
+                exam_data.query.filter_by(id = i.id).update(dict(db_write = 1))
+                
         db.session.commit()
         
         return "A"

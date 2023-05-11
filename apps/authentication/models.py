@@ -78,6 +78,7 @@ class exam_data(db.Model, UserMixin) :
     select_mean = db.Column(db.Text)
     question_count = db.Column(db.Integer)
     check = db.Column(db.Integer)
+    db_write = db.Column(db.Integer, default = 0)
     
 
 
