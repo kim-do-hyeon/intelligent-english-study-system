@@ -133,12 +133,17 @@
                                 <div class="row align-items-center">
                                     {% if session['group'] == "A" %}
                                     <h2>{{gpt_data[0]}}</h2>
-                                    <p class="mb-0">
-                                        {{gpt_data[1]}}
-                                    </p><br><br>
+                                    <h3>
+                                        <b>{{gpt_data[1]}}</b>
+                                    </h3><br><br>
                                     {% endif %}
                                     <div class="col-12">
-                                        <p>지금까지 {{total_learn_data}}개 학습했어요!</p>
+                                        <p style="float: right;">지금까지 {{total_learn_data}}개 학습했어요!<br>
+                                            {% if check == 1 %}
+                                                <span style="float: right; color: blue;">다른 사용자가 학습한 단어에요!</span>
+                                            {% endif %}
+                                        </p>
+                                        
                                         <a href="/learn/{{title}}" class="btn btn-primary">
                                             <span class="me-1">
                                                 <span class="fas fa-headphones"></span>
@@ -157,6 +162,7 @@
                                             </span>
                                             버그 신고
                                         </button>
+                                        
                                     </div>
                                 </div>
                             </div>

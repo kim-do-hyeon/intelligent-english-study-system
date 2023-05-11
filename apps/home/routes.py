@@ -20,6 +20,8 @@ def index():
 @blueprint.route('/learn/<path:subpath>')
 # @login_required
 def learn(subpath) :
+    ''' Sample Session '''
+    session['username'] = "pental"
     group = Users.query.filter_by(username = session['username']).first().group
     if group == "A" : session['group'] = "A"
     elif group == "B" : session['group'] = "B"
@@ -28,32 +30,47 @@ def learn(subpath) :
         total_datas = word_data.query.all()
         randon_word_indexs = random.sample(range(0,len(total_datas)),2)
         random_words_datas = [total_datas[randon_word_indexs[0]], total_datas[randon_word_indexs[1]]]
-        sentence, translate = gen_sentence(random_words_datas[0].word, random_words_datas[1].word)
-        gpt_values = [sentence, translate]
-        database_value = gpt_data(
-            word1 = random_words_datas[0].word,
-            word2 = random_words_datas[1].word,
-            example = sentence,
-            example_mean = translate
-        )
-        db.session.add(database_value)
-        db.session.commit()
-        index = gpt_data.query.filter_by(word1 = random_words_datas[0].word,
-                                    word2 = random_words_datas[1].word,
-                                    example = sentence,
-                                    example_mean = translate).first().id
-        user_value = user_data(
-            username = session['username'],
-            index = index
-        )
-        db.session.add(user_value)
-        db.session.commit()
+
+        previous_datas_A = gpt_data.query.filter_by(word1 = random_words_datas[0].word, word2 = random_words_datas[1].word).first()
+        previous_datas_B = gpt_data.query.filter_by(word1 = random_words_datas[1].word, word2 = random_words_datas[0].word).first()
+        print(previous_datas_A)
+        if previous_datas_A != None or previous_datas_B :
+            try :
+                gpt_values = [previous_datas_A.example, previous_datas_A.example_mean]
+                index = previous_datas_A.id
+            except :
+                gpt_values = [previous_datas_B.example, previous_datas_B.example_mean]
+                index = previous_datas_B.id
+            check = 1
+        else :
+            sentence, translate = gen_sentence(random_words_datas[0].word, random_words_datas[1].word)
+            gpt_values = [sentence, translate]
+            database_value = gpt_data(
+                word1 = random_words_datas[0].word,
+                word2 = random_words_datas[1].word,
+                example = sentence,
+                example_mean = translate
+            )
+            db.session.add(database_value)
+            db.session.commit()
+            index = gpt_data.query.filter_by(word1 = random_words_datas[0].word,
+                                        word2 = random_words_datas[1].word,
+                                        example = sentence,
+                                        example_mean = translate).first().id
+            user_value = user_data(
+                username = session['username'],
+                index = index
+            )
+            db.session.add(user_value)
+            db.session.commit()
+            check = 0
         total_learn_data = len(user_data.query.filter_by(username = session['username']).all())
 
         return render_template("home/word_learn.html", title = "toeic",
                                original_datas = random_words_datas,
                                gpt_data = gpt_values, index = index,
-                               total_learn_data = total_learn_data)
+                               total_learn_data = total_learn_data,
+                               check = check)
     elif subpath == "vocabulary_list" :
         user_word_datas = user_word_data.query.filter_by(username = session['username']).all()
         user_word_data_index = []
