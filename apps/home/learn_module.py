@@ -2,6 +2,7 @@ from apps.authentication.models import word_data, gpt_data, user_word_data, user
 import random
 from apps import db
 from apps.home.exam_module import *
+from apps.home.get_sentence_module import *
 
 def learn_module_toeic(username) :
     total_datas = word_data.query.all()
@@ -20,7 +21,7 @@ def learn_module_toeic(username) :
             index = previous_datas_B.id
         check = 1
     else :
-        sentence, translate = get(random_words_datas[0].word, random_words_datas[1].word)
+        sentence, translate = gen_sentence(random_words_datas[0].word, random_words_datas[1].word)
         gpt_values = [sentence, translate]
         database_value = gpt_data(
             word1 = random_words_datas[0].word,

@@ -1,0 +1,125 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}{% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+{% block content %}
+
+    <main>
+        
+        {% include 'includes/preloader.html' %}
+
+        <!-- Hero -->
+        <div class="section-header pb-6 bg-primary text-white">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-md-8 text-center">
+                        <h1 class="display-3 mb-4">시험 결과</h1>
+                        <p class="lead mb-5">해당 페이지에서는 시험 결과를 출력합니다.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- End of Hero -->
+        <div class="section section-md">
+            <div class="container">
+                {{session['username']}}님의 직전 시험 결과입니다.<br>
+                전체 응답자 비율은 해당 단어를 얼마나 많은 사람이 맞췄는지 나타내는 비율입니다.<br>
+                1.0 초과시 해당 비율은 맞춘비율이 더욱 높은것이고, 1.0미만시 틀린 비율이 더 많다는 것을 의미합니다.<br>
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <div class="mb-5">
+                          <table class="table">
+                            <tr>
+                                <th scope="col">단어</th>
+                                <th scope="col">뜻</th>
+                                <th scope="col">결과</th>
+                                <th scope="col">전체 응답자 비율</th>
+                                <th scope="col">취약 여부</th>
+                            </tr>
+                            {% for i in exam_word_data %}
+                            <tr>
+                              <th scope="row">{{i.word}}</th>
+                              <th scope="row">{{i.mean}}</th>
+                              {% if i.check == 0 %}
+                              <th scope="row" style="color: red;">X</th>
+                              {% else %}
+                              <th scope="row" style="color: blue;">O</th>
+                              {% endif %}
+                              {% for key, value in word.items() %}
+                                {% if i.word == key %}
+                                  <th scope="row" style="color: blue;">{{value}}</th>
+                                {% endif %}
+                              {% endfor %}
+                              {% for key, value in word.items() %}
+                                {% if i.word == key %}
+                                  {% if value < 0.5 and i.check == 0%}
+                                    <th scope="row" style="color: red;">취약</th>
+                                  {% endif %}
+                                {% endif %}
+                              {% endfor %}
+                            </tr>
+                            {% endfor %}
+                          </table>
+                        </div>
+                      </div>
+                      <div class="col-lg-4">
+                          <canvas id="myPieChart"></canvas>
+                      </div>
+                      <h3>아래는 해당 시스템에 대한 설문조사지 입니다. 1회만 설문에 응답해주시면 감사하겠습니다.</h3>
+                    </div>
+                  <div class="col-lg-12">
+                    <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSf_0Y9SCLu4G2QHe8RptOdbsekq4VDyd7a__3gauopSPb3eJw/viewform?embedded=true" width="1140" height="5216" frameborder="0" marginheight="0" marginwidth="0">로드 중…</iframe>
+                  </div>
+                </div>
+            </div>
+        </div>
+        <script>
+          // pass count와 fail count 데이터
+          var passCount = 13;
+          var failCount = 7;
+  
+          // 그래프를 그릴 캔버스 요소 선택
+          var ctx = document.getElementById('myPieChart').getContext('2d');
+  
+          // 원형 그래프 설정
+          var myPieChart = new Chart(ctx, {
+              type: 'doughnut', // 원형 그래프 유형 선택
+              data: {
+                  labels: ['Pass', 'Fail'], // 라벨 설정
+                  datasets: [{
+                      data: [passCount, failCount], // 데이터 설정
+                      backgroundColor: [
+                          'green', // Pass의 색상
+                          'red'    // Fail의 색상
+                      ]
+                  }]
+              },
+              options: {
+                  plugins: {
+                      datalabels: {
+                          color: 'white', // 데이터 레이블의 글꼴 색상
+                          formatter: function(value, context) {
+                              return value + '개'; // 데이터 포맷 설정
+                          }
+                      }
+                  },
+                  legend: {
+                      display: true, // 범례 표시 여부
+                      position: 'bottom' // 범례 위치 (top, bottom, left, right 중 선택)
+                  }
+              }
+          });
+      </script>
+  </body>
+  </html>
+  
+    </main>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}
+

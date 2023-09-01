@@ -21,8 +21,6 @@ def index():
 @blueprint.route('/learn/<path:subpath>')
 # @login_required
 def learn(subpath) :
-    ''' Sample Session '''
-    session['username'] = "pental"
     group = Users.query.filter_by(username = session['username']).first().group
     if group == "A" : session['group'] = "A"
     elif group == "B" : session['group'] = "B"
@@ -44,7 +42,6 @@ def exam(subpath) :
     if subpath == "toeic" :
         count = 1
         max_count = 20
-        session['username'] = "pental"
         random_word, fake_mean = exam_module_get_word(session['username'])
         if len(random_word) == 0 :
             flash("응시 데이터가 부족합니다. 최소 20단어 이상 학습해주세요.")
@@ -55,7 +52,6 @@ def exam(subpath) :
                                 current_question = count,
                                 total_question = max_count)
     elif subpath == "result" :
-        session['username'] = "pental"
         exam_user_data = exam_data.query.filter_by(username = session['username']).all()[-20:]
         question_serial_check = []
         for i in exam_user_data : question_serial_check.append(i.question_count)
@@ -64,14 +60,11 @@ def exam(subpath) :
             if check_list[i] != question_serial_check[i] :
                 flash("시험 데이터가 손상되었습니다. 다시 시험을 응시해주세요.")
                 return redirect("/index")
+        
+        user_exam_pass_count, user_exam_fail_count, word = exam_module_result_db(session['username'], exam_user_data)
+        exam_word_data = exam_data.query.filter_by(username = session['username']).all()[-20:]
 
-            if exam_user_data[i].db_write == 1 :
-                flash("시험 데이터가 손상되었습니다. 다시 시험을 응시해주세요.")
-                return redirect("/index")
-        
-        exam_module_result_db(session['username'], exam_user_data)
-        
-        return "A"
+        return render_template("home/result.html", word = word, exam_word_data = exam_word_data)
     
 @blueprint.route('/ajax', methods=['GET', 'POST'])
 @login_required
@@ -84,7 +77,7 @@ def ajax() :
         ajax_report(int(data['value'])) # ajax_report(index)
         return jsonify(result = "success")
     elif data['type'] == "group" :
-        ajax_report(data['username'], data['value']) # ajax_group(username, select_group)
+        ajax_group(data['username'], data['value']) # ajax_group(username, select_group)
         return jsonify(result = 'success')
     elif data['type'] == "post" :
         question_count  = ajax_exam_post(data)
