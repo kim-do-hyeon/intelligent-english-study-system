@@ -45,21 +45,21 @@ def exam_module_result_db(username, exam_user_data) :
         gpt_learn_data_pass_count = gpt_data_index.pass_count
         gpt_learn_data_fail_count = gpt_data_index.fail_count
         user_learn_data_checking_index = user_data.query.filter_by(username = username, index = gpt_data_index.id).first()
-        if user_learn_data_checking_index is not None:
-            user_learn_data_pass_count = user_learn_data_checking_index.pass_count
-        else:
-            user_learn_data_pass_count = 0
-        if user_learn_data_checking_index is not None: 
-            user_learn_data_fail_count = user_learn_data_checking_index.fail_count
-        else :
-            user_learn_data_fail_count = 0
+        # if user_learn_data_checking_index is not None:
+        #     user_learn_data_pass_count = user_learn_data_checking_index.pass_count
+        # else:
+        #     user_learn_data_pass_count = 0
+        # if user_learn_data_checking_index is not None: 
+        #     user_learn_data_fail_count = user_learn_data_checking_index.fail_count
+        # else :
+        #     user_learn_data_fail_count = 0
 
         if i.check == 1 :
-            user_data.query.filter_by(id = user_learn_data_checking_index.id).update(dict(pass_count = int(user_learn_data_pass_count) + 1))
+            # user_data.query.filter_by(id = user_learn_data_checking_index.id).update(dict(pass_count = int(user_learn_data_pass_count) + 1))
             gpt_data.query.filter_by(id = gpt_data_index.id).update(dict(pass_count = int(gpt_learn_data_pass_count) + 1))
             user_exam_pass += 1
         elif i.check == 0 :
-            user_data.query.filter_by(id = user_learn_data_checking_index.id).update(dict(fail_count = int(user_learn_data_fail_count) + 1))
+            # user_data.query.filter_by(id = user_learn_data_checking_index.id).update(dict(fail_count = int(user_learn_data_fail_count) + 1))
             gpt_data.query.filter_by(id = gpt_data_index.id).update(dict(fail_count = int(gpt_learn_data_fail_count) + 1))
             user_exam_fail += 1
         
