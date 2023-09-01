@@ -60,7 +60,10 @@ def exam_module_result_db(username, exam_user_data) :
         ''' DB Write for Analyze '''
         gpt_learn_data_pass_count = gpt_data_index.pass_count
         gpt_learn_data_fail_count = gpt_data_index.fail_count
-        rate = int(gpt_learn_data_pass_count) / int(gpt_learn_data_fail_count)
+        try :
+            rate = int(gpt_learn_data_pass_count) / int(gpt_learn_data_fail_count)
+        except :
+            rate = 0
         gpt_data.query.filter_by(id = gpt_data_index.id).update(dict(rate = rate))
         exam_data.query.filter_by(id = i.id).update(dict(db_write = 1))
 
