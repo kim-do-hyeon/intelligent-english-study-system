@@ -57,6 +57,7 @@
                 success: function (response) {
                   if(response['process'] == 'close'){
                     alert("시험을 종료합니다.");
+                    location.replace("/exam/result")
                     return;
                   }else{
                     var question_count = response['question_count'];
