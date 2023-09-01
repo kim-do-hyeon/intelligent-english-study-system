@@ -14,17 +14,18 @@ from apps.home.admin_module import *
 from apps.home.learn_module import *
 
 @blueprint.route('/index')
-# @login_required
+@login_required
 def index():
     return render_template('home/index.html', segment='index')
 
 @blueprint.route('/learn/<path:subpath>')
-# @login_required
+@login_required
 def learn(subpath) :
-    group = Users.query.filter_by(username = session['username']).first().group
-    if group == "A" : session['group'] = "A"
-    elif group == "B" : session['group'] = "B"
-    else : session['group'] = "X"
+    # group = Users.query.filter_by(username = session['username']).first().group
+    # if group == "A" : session['group'] = "A"
+    # elif group == "B" : session['group'] = "B"
+    # else : session['group'] = "X"
+    session['group'] = "A"
     if subpath == "toeic" :
         random_words_datas, gpt_values, index, total_learn_data, check = learn_module_toeic(session['username'])
         return render_template("home/word_learn.html", title = "toeic",
@@ -37,7 +38,7 @@ def learn(subpath) :
         return render_template("home/vocabulary_list.html", data = datas)
 
 @blueprint.route('/exam/<path:subpath>', methods=['GET', 'POST'])
-# @login_required
+@login_required
 def exam(subpath) :
     if subpath == "toeic" :
         count = 1
@@ -56,10 +57,14 @@ def exam(subpath) :
         question_serial_check = []
         for i in exam_user_data : question_serial_check.append(i.question_count)
         check_list = list(range(1, 21))
-        for i in range(len(check_list)) :
-            if check_list[i] != question_serial_check[i] :
-                flash("시험 데이터가 손상되었습니다. 다시 시험을 응시해주세요.")
-                return redirect("/index")
+        try :
+            for i in range(len(check_list)) :
+                if check_list[i] != question_serial_check[i] :
+                    flash("시험 데이터가 손상되었습니다. 다시 시험을 응시해주세요.")
+                    return redirect("/index")
+        except :
+            flash("아직 학습이 완료되지 않았습니다.")
+            return redirect("/index")
         
         user_exam_pass_count, user_exam_fail_count, word = exam_module_result_db(session['username'], exam_user_data)
         exam_word_data = exam_data.query.filter_by(username = session['username']).all()[-20:]
@@ -90,94 +95,99 @@ def ajax() :
                     fake_mean = fake_mean)
     
 @blueprint.route('/admin/<path:subpath>', methods=['GET', 'POST'])
-# @login_required
+@login_required
 def admin(subpath) :
-    subpath = subpath.split("/")
-    if subpath[0] == "upload" :
-        if subpath[1] == "word" :
-            data = Excel_Data.query.all()
-            return render_template('home/upload_excel.html', data = data)
-        elif subpath[1] == "excel" :
-            upload = request.files.getlist("file[]")
-            admin_upload_excel(upload)
-            flash("엑셀 파일이 등록되었습니다.")
-            return redirect('/admin/upload/word')
-        elif subpath[1] == "apply" :
-            admin_upload_apply(subpath[2])
-            flash("엑셀 파일의 권한이 수정되었습니다.")
-            return redirect('/admin/upload/word')
-        elif subpath[1] == "unapply" :
-            admin_upload_unapply(subpath[2])
-            flash("엑셀 파일의 권한이 수정되었습니다.")
-            return redirect('/admin/upload/word')
-        elif subpath[1] == "delete" :
-            admin_upload_delete(subpath[2])
-            flash("파일이 삭제되었습니다.")
-            return redirect('/admin/upload/word')
-    elif subpath[0] == "management" :
-        if subpath[1] == "database" :
-            if subpath[2] == "view" :
-                word_datas, excel_datas, word_data_frame = admin_management_database_view()
-                return render_template('home/word_data.html',
-                                       word_datas = word_datas,
-                                       excel_datas = excel_datas,
-                                       word_data_frame = word_data_frame)
-            elif subpath[2] == "add" :
-                if subpath[3] == "all" :
-                    admin_management_database_add_all()
-                    return redirect("/admin/management/database/view")
-                elif subpath[3] != "all" :
-                    admin_management_database_add_select(int(subpath[3]))
-                    return redirect("/admin/management/database/view")
-            elif subpath[2] == "delete" :
-                if subpath[3] == "all" :
-                    admin_management_database_delete_all
-                    return redirect("/admin/management/database/view")
-                elif subpath[3] != "all" :
-                    admin_management_database_delete_select(int(subpath[3]))
-                    return redirect("/admin/management/database/view")
-    elif subpath[0] == "user" :
-        if subpath[1] == "view" :
-            if subpath[2] == "all" :
-                datas = Users.query.all()
-                return render_template('home/user.html', 
-                                    data = datas)
-            elif subpath[2] == "permission" :
-                datas = Users.query.all()
-                return render_template('home/user_permission.html', 
-                                    data = datas)
-        elif subpath[1] == "apply" :
-            if subpath[2] == "admin" :
-                data = Users.query.filter_by(id = subpath[3]).update(dict(admin=1))
-                db.session.commit()
-                return redirect('/admin/user/view/all')
-            elif subpath[2] == "permission" : 
-                data = Users.query.filter_by(id = subpath[3]).update(dict(apply=1))
-                db.session.commit()
-                return redirect('/admin/user/view/permission')
-        elif subpath[1] == "unapply" :
-            if subpath[2] == "admin" :
-                data = Users.query.filter_by(id = subpath[3]).update(dict(admin=0))
-                db.session.commit()
-                return redirect('/admin/user/view/all')
-            elif subpath[2] == "permission" : 
-                data = Users.query.filter_by(id = subpath[3]).update(dict(apply=0))
-                db.session.commit()
-                return redirect('/admin/user/view/permission')
-        elif subpath[1] == "delete" :
-            if subpath[2] == "admin" :
-                data = Users.query.filter_by(id = subpath[3]).first()
-                db.session.delete(data)
-                db.session.commit()
-                return redirect('/admin/user/view/all')
-        elif subpath[1] == "reset" :
-            if subpath[2] == "group" :
-                data = Users.query.filter_by(id = subpath[3]).update(dict(group="X"))
-                db.session.commit()
-                return redirect('/admin/user/view/permission')
+    data = Users.query.filter_by(username = session['username']).first()
+    if data.admin == 1 :
+        subpath = subpath.split("/")
+        if subpath[0] == "upload" :
+            if subpath[1] == "word" :
+                data = Excel_Data.query.all()
+                return render_template('home/upload_excel.html', data = data)
+            elif subpath[1] == "excel" :
+                upload = request.files.getlist("file[]")
+                admin_upload_excel(upload)
+                flash("엑셀 파일이 등록되었습니다.")
+                return redirect('/admin/upload/word')
+            elif subpath[1] == "apply" :
+                admin_upload_apply(subpath[2])
+                flash("엑셀 파일의 권한이 수정되었습니다.")
+                return redirect('/admin/upload/word')
+            elif subpath[1] == "unapply" :
+                admin_upload_unapply(subpath[2])
+                flash("엑셀 파일의 권한이 수정되었습니다.")
+                return redirect('/admin/upload/word')
+            elif subpath[1] == "delete" :
+                admin_upload_delete(subpath[2])
+                flash("파일이 삭제되었습니다.")
+                return redirect('/admin/upload/word')
+        elif subpath[0] == "management" :
+            if subpath[1] == "database" :
+                if subpath[2] == "view" :
+                    word_datas, excel_datas, word_data_frame = admin_management_database_view()
+                    return render_template('home/word_data.html',
+                                        word_datas = word_datas,
+                                        excel_datas = excel_datas,
+                                        word_data_frame = word_data_frame)
+                elif subpath[2] == "add" :
+                    if subpath[3] == "all" :
+                        admin_management_database_add_all()
+                        return redirect("/admin/management/database/view")
+                    elif subpath[3] != "all" :
+                        admin_management_database_add_select(int(subpath[3]))
+                        return redirect("/admin/management/database/view")
+                elif subpath[2] == "delete" :
+                    if subpath[3] == "all" :
+                        admin_management_database_delete_all
+                        return redirect("/admin/management/database/view")
+                    elif subpath[3] != "all" :
+                        admin_management_database_delete_select(int(subpath[3]))
+                        return redirect("/admin/management/database/view")
+        elif subpath[0] == "user" :
+            if subpath[1] == "view" :
+                if subpath[2] == "all" :
+                    datas = Users.query.all()
+                    return render_template('home/user.html', 
+                                        data = datas)
+                elif subpath[2] == "permission" :
+                    datas = Users.query.all()
+                    return render_template('home/user_permission.html', 
+                                        data = datas)
+            elif subpath[1] == "apply" :
+                if subpath[2] == "admin" :
+                    data = Users.query.filter_by(id = subpath[3]).update(dict(admin=1))
+                    db.session.commit()
+                    return redirect('/admin/user/view/all')
+                elif subpath[2] == "permission" : 
+                    data = Users.query.filter_by(id = subpath[3]).update(dict(apply=1))
+                    db.session.commit()
+                    return redirect('/admin/user/view/permission')
+            elif subpath[1] == "unapply" :
+                if subpath[2] == "admin" :
+                    data = Users.query.filter_by(id = subpath[3]).update(dict(admin=0))
+                    db.session.commit()
+                    return redirect('/admin/user/view/all')
+                elif subpath[2] == "permission" : 
+                    data = Users.query.filter_by(id = subpath[3]).update(dict(apply=0))
+                    db.session.commit()
+                    return redirect('/admin/user/view/permission')
+            elif subpath[1] == "delete" :
+                if subpath[2] == "admin" :
+                    data = Users.query.filter_by(id = subpath[3]).first()
+                    db.session.delete(data)
+                    db.session.commit()
+                    return redirect('/admin/user/view/all')
+            elif subpath[1] == "reset" :
+                if subpath[2] == "group" :
+                    data = Users.query.filter_by(id = subpath[3]).update(dict(group="X"))
+                    db.session.commit()
+                    return redirect('/admin/user/view/permission')
+    else :
+        flash("관리자만 접근 가능합니다.")
+        return redirect('/index')
             
 @blueprint.route('/<template>')
-# @login_required
+@login_required
 def route_template(template):
     try:
         if not template.endswith('.html'):
