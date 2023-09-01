@@ -37,5 +37,9 @@ def ajax_exam_post(data) :
                     check = check
                     )
     db.session.add(exam)
-    db.session.commit()
+    try :
+        db.session.commit()
+    except:
+        db.session.close_all()
+        db.session.commit()
     return question_count
